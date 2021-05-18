@@ -223,7 +223,7 @@ class ContinuousVideoCapture(PipelineWorker):
         else:
             # USB camera
             # Open the camera device
-            self.capture = cv2.VideoCapture(cameraId)
+            self.capture = cv2.VideoCapture(cameraId,cv2.CAP_V4L2)
             if self.capture.isOpened() is False:
                 raise VideoAppUtilsDeviceError( \
                     'Camera %d could not be opened.' % (cameraId))
