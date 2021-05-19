@@ -38,7 +38,6 @@ import argparse
 import datetime
 import logging
 
-
 class VideoAppUtilsError(Exception):
     pass
 
@@ -223,7 +222,7 @@ class ContinuousVideoCapture(PipelineWorker):
         else:
             # USB camera
             # Open the camera device
-            self.capture = cv2.VideoCapture(cameraId)
+            self.capture = cv2.VideoCapture(cameraId, cv2.CAP_V4L2)
             if self.capture.isOpened() is False:
                 raise VideoAppUtilsDeviceError( \
                     'Camera %d could not be opened.' % (cameraId))
@@ -430,6 +429,7 @@ class ContinuousVideoProcess():
     def execute(self):
         ''' execute video processing loop
         '''
+        MAXFPS=0
         self.startPipeline()
         while True:
             frame = self.getOutput()
@@ -440,8 +440,10 @@ class ContinuousVideoProcess():
             interval = self.fpsCounter.measure()
             if interval is not None:
                 fps = 1.0 / interval
+                if fps > MAXFPS:
+                    MAXFPS=fps
                 dt = datetime.datetime.now().strftime('%F %T')
-                fpsInfo = '{0}{1:.2f} {2}'.format('FPS:', fps, dt)
+                fpsInfo = '{0}{1:.2f} {2}{3:.0f} {4}'.format('FPS:', fps,"MAX:", MAXFPS,dt)
                 cv2.putText(frame, fpsInfo, (8, 32), \
                     cv2.FONT_HERSHEY_SIMPLEX, 1, (255, 0, 0), 1, cv2.LINE_AA)
             cv2.imshow(self.title, frame)  
@@ -453,6 +455,8 @@ class ContinuousVideoProcess():
             if cv2.getWindowProperty(self.title, cv2.WND_PROP_AUTOSIZE) < 0:
                 break
         cv2.destroyAllWindows()
+        # with open('fps.txt','w') as f:
+        #     f.write(str(fps)) 
         self.stopPipeline()
 
     def getOutput(self):
