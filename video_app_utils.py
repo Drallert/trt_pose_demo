@@ -387,6 +387,8 @@ class ContinuousVideoProcess():
         Args:
             args(argparse.Namespace): video capture command-line arguments
         '''
+        fps = args.fps
+        
         if args.src_file is not None:
             self.capture = VideoDecoder( \
                 args.src_file, args.qsize, args.repeat, args.h265)
@@ -405,8 +407,20 @@ class ContinuousVideoProcess():
         self.title = args.title
         self.nodrop = args.nodrop
         self.pipeline = None
+        self.write = args.write
+        if self.write:
+            now = datetime.datetime.now().strftime('%b_%d_%Y_%H_%M_%S')
+
+            name = "./" + now + ".mp4"
+            fourcc= cv2.VideoWriter_fourcc(*'mp4v')
+
+            self.writer = cv2.VideoWriter(name,fourcc,float(fps),(args.width,args.height))
+        else:
+            self.writer = None
         
     def __del__(self):
+        if self.write:
+            self.writer.release()
         cv2.destroyAllWindows()
         self.stopPipeline()
 
@@ -423,6 +437,8 @@ class ContinuousVideoProcess():
             worker.start()
 
     def stopPipeline(self):
+        if self.write:
+            self.writer.release()
         if hasattr(self, 'pipeline') and self.pipeline is not None:
             for worker in self.pipeline:
                 worker.stop()
@@ -448,6 +464,8 @@ class ContinuousVideoProcess():
                 cv2.putText(frame, fpsInfo, (8, 32), \
                     cv2.FONT_HERSHEY_SIMPLEX, 1, (255, 0, 0), 1, cv2.LINE_AA)
             cv2.imshow(self.title, frame)  
+            if self.write:
+                self.writer.write(frame)
             # Check if ESC key is pressed to terminate this application
             key = cv2.waitKey(1)
             if key == 27: # ESC
@@ -455,7 +473,10 @@ class ContinuousVideoProcess():
             # Check if the window was closed
             if cv2.getWindowProperty(self.title, cv2.WND_PROP_AUTOSIZE) < 0:
                 break
+        #if self.write:
+        #    self.writer.release()
         cv2.destroyAllWindows()
+
         # with open('fps.txt','w') as f:
         #     f.write(str(fps)) 
         self.stopPipeline()

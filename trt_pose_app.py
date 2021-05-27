@@ -140,11 +140,16 @@ def main():
         width=800, height=600)
     parser = argparse.ArgumentParser( \
         parents=[cvpParser], description='TRT Pose Demo')
+    parser.add_argument('--write',\
+        action="store_true",\
+        help="Write the captured video/camera feed")
+
     parser.add_argument('--model', \
         type=str, \
         default='resnet18_baseline_att_224x224_A_epoch_249.pth', \
         metavar='MODEL', \
         help='Model weight file')
+
     parser.add_argument('--task', \
         type=str, \
         default='human_pose.json', \
