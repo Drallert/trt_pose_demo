@@ -290,7 +290,8 @@ class VideoDecoder(PipelineWorker):
             self.gstCmd = VideoDecoder.GST_STR_DEC_H265 % (file)
         else:
             self.gstCmd = VideoDecoder.GST_STR_DEC_H264 % (file)
-        self.capture = cv2.VideoCapture(self.gstCmd, cv2.CAP_GSTREAMER)
+        #self.capture = cv2.VideoCapture(self.gstCmd, cv2.CAP_GSTREAMER)
+        self.capture= cv2.VideoCapture(file)
         if self.capture.isOpened() == False:
             raise VideoAppUtilsEosError('%s could not be opened.' % (file))
         
