@@ -3,32 +3,39 @@ import numpy as np
 import cv2
 import math
 
+
+zonas_validas = {
+    "neck":{
+        "0":[range(85,90),range(90,95)],
+        "1":[range(96,102),range(78,84)],
+        "2":[range(103,114),range(66,77)],
+        "3":[range(115,180),range(0,65)]
+    }
+    ,
+    "shoulders":{
+        "0":[range(0,5),range(175,180)],
+        "1":[range(6,10),range(174,170)],
+        "2":[range(11,20),range(169,160)],
+        "3":[range(21,159)]
+    },
+    "arms":{
+        "0":[range(77,90),range(90,103)],
+        "1":[range(56,76),range(124,144)],
+        "2":[range(23,55),range(145,157)],
+        "3":[range(0,22),range(158,180)]
+    }
+    
+
+}
+
+
 def angulo(image,debug=False):
     '''
-    A esta funcion se le pasa una imagen en negro con dos lineas y te calcula el ángulo entre las líneas
+    A esta funcion se le pasan dos puntos que conforman una línea y calcula el ángulo de dicha línea
     '''
-    #image = cv2.imread('2.png')
 
-    # Compute arithmetic mean
-    #image = np.mean(image,axis=2)
 
-    # Perform Hough Transformation to detect lines
     
-    # hspace, angles, distances = hough_line(image)
-
-    # # Find angle
-    # angle=[]
-    # for _, a , distances in zip(*hough_line_peaks(hspace, angles, distances,min_angle=1,min_distance=1)):
-    #     angle.append(a)
-
-    # # Obtain angle for each line
-    # angles = [a*180/np.pi for a in angle]
-
-    # # Compute difference between the two lines
-    # angle_difference = np.max(angles) - np.min(angles)
-
-    # if debug:
-    #     print(angle_difference)
 
     return angle_difference
 
@@ -44,9 +51,9 @@ def comprueba_cuello(nose,neck,show=False):
         cv2.imshow('',blank)
         cv2.waitKey(0)
     #angle = angulo(blank,True)
-    angle_neck = math.atan2(neck[1] - nose[1], neck[0] - nose[0]) * 180.0 /np.pi; 
+    angle_neck = math.atan2(nose[1] - neck[1], nose[0] - neck[0]) * 180.0 /np.pi; 
     diff = angle_neck - 90
-    return abs(diff)
+    return diff
 
 
 def comprueba_hombros(r_shoulder,l_shoulder,show=False):
@@ -63,20 +70,28 @@ def comprueba_hombros(r_shoulder,l_shoulder,show=False):
     angle_neck = math.atan2(l_shoulder[1] - r_shoulder[1], l_shoulder[0] - r_shoulder[0]) * 180.0 /np.pi; 
     diff = angle_neck
 
-    return diff #-0
+    return abs(diff) #-0
     pass
 
-def comprueba_brazos(l_elbow,l_shoulder,r_elbow,r_shoulder):
-
+def comprueba_brazos(l_elbow,l_shoulder,r_elbow,r_shoulder,show=False):
+    ang_izq = comprueba_cuello(l_elbow,l_shoulder,show)
+    ang_derecha = comprueba_cuello(r_elbow,r_shoulder,show)
+    return ang_izq,ang_derecha
     pass
 
 
 if __name__ == "__main__":
 
-    #angle = comprueba_cuello((405,271),(402,424))
+    neck = (402,424)
+    nose = (405,271)
     l_shoulder = (497,423)
     r_shoulder = (306,426)
-    angle = comprueba_cuello((0,400),(800,400))
-    angle2 = comprueba_hombros(r_shoulder,l_shoulder)
+    r_elbow = (800-603,800-239)
+    l_elbow = (560,603)
+    #angle = comprueba_cuello((0,400),(800,400))
+    angle = comprueba_cuello(nose,neck,True)
+    angle2 = comprueba_hombros(r_shoulder,l_shoulder,True)
+    angle3,angle4 = comprueba_brazos(l_elbow,l_shoulder,r_elbow,r_shoulder,True)
     print(angle)
     print(angle2)
+    print(angle3,angle4)
