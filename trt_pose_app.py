@@ -142,7 +142,8 @@ def main():
         parents=[cvpParser], description='TRT Pose Demo')
     parser.add_argument('--write',\
         action="store_true",\
-        help="Write the captured video/camera feed")
+        help="Write the captured video/camera feed",
+        default=False)
 
     parser.add_argument('--model', \
         type=str, \

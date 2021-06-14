@@ -411,7 +411,7 @@ class ContinuousVideoProcess():
         if self.write:
             now = datetime.datetime.now().strftime('%b_%d_%Y_%H_%M_%S')
 
-            name = "./" + now + ".mp4"
+            name = now + ".mp4"
             fourcc= cv2.VideoWriter_fourcc(*'mp4v')
 
             self.writer = cv2.VideoWriter(name,fourcc,float(fps),(args.width,args.height))
@@ -459,12 +459,14 @@ class ContinuousVideoProcess():
                 fps = 1.0 / interval
                 if fps > MAXFPS:
                     MAXFPS=fps
-                dt = datetime.datetime.now().strftime('%F %T')
+                #dt = datetime.datetime.now().strftime('%F %T')
+                dt = str(datetime.datetime.now())
                 fpsInfo = '{0}{1:.2f} {2}{3:.0f} {4}'.format('FPS:', fps,"MAX:", MAXFPS,dt)
                 cv2.putText(frame, fpsInfo, (8, 32), \
                     cv2.FONT_HERSHEY_SIMPLEX, 1, (255, 0, 0), 1, cv2.LINE_AA)
             cv2.imshow(self.title, frame)  
             if self.write:
+                #print(self.writer.isOpened())
                 self.writer.write(frame)
             # Check if ESC key is pressed to terminate this application
             key = cv2.waitKey(1)
@@ -473,8 +475,8 @@ class ContinuousVideoProcess():
             # Check if the window was closed
             if cv2.getWindowProperty(self.title, cv2.WND_PROP_AUTOSIZE) < 0:
                 break
-        #if self.write:
-        #    self.writer.release()
+        if self.write:
+            self.writer.release()
         cv2.destroyAllWindows()
 
         # with open('fps.txt','w') as f:
